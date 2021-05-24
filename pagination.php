@@ -6,8 +6,8 @@ spl_autoload_register(function ($class_name) {
 });
 
 $input=json_decode(file_get_contents('php://input'),true);
-$id=$input['id'];
+$id=$input['key'];
 $productModel = new ProductModel();
-$item = $productModel->getProductById($id);
+$item = $productModel->getProductsByPage(3,$id);
 
 echo json_encode($item);
