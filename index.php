@@ -17,7 +17,6 @@ if (isset($_GET['page'])) {
 $productList = $productModel->getProductsByPage($perPage, $page);
 $categoryModel = new CategoryModel();
 $categoryList = $categoryModel->getCategories();
-
 $pageLinks = Pagination::createPageLinks($totalRow, $perPage, $page);
 ?>
 <!DOCTYPE html>
@@ -31,8 +30,14 @@ $pageLinks = Pagination::createPageLinks($totalRow, $perPage, $page);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
+        .color-blue {
+            color: blue;
+        }
+
         mark {
             color: #fff;
             background-color: #0e5142;
@@ -40,7 +45,7 @@ $pageLinks = Pagination::createPageLinks($totalRow, $perPage, $page);
             padding: 0;
         }
 
-        #heart{
+        #heart {
             display: none;
         }
 
@@ -203,6 +208,19 @@ $pageLinks = Pagination::createPageLinks($totalRow, $perPage, $page);
                                     <h5 class="card-title" data-bs-toggle="modal" data-bs-target="#modal" onclick="getProductById(<?php echo $item['id'] ?>)"><?php echo $item['product_name'] ?></h5>
                                     <p class="card-text"><?php echo $item['product_price'] ?></p>
                                 </div>
+                                <?php
+                                if (isset($_COOKIE['username'])) {
+                                    $userLike = $productModel->getUserLike($item['id'], $_COOKIE['username']);
+                                }
+                                $class = '';
+                                if (isset($userLike) && $userLike) {
+                                    $class = 'color-blue';
+                                }
+                                ?>
+                                <div class="d-flex justify-content-center align-items-center like-box py-2 <?php echo $class ?>" data-id="<?php echo $item['id'] ?>" style="z-index: 1;">
+                                    <i class="far fa-thumbs-up like" data-id="<?php echo $item['id'] ?>" style="z-index: -1;"><?php echo $productModel->getLike($item['id']) ?></i>
+                                </div>
+
                             </div>
                         </div>
                     <?php
@@ -218,8 +236,6 @@ $pageLinks = Pagination::createPageLinks($totalRow, $perPage, $page);
                     <button type="button" name="load-more" id="load-more" class="btn btn-primary" btn-lg btn-block value="1">load more</button>
                 </div>
             </div>
-
-
 
             <!-- Modal -->
             <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -239,13 +255,27 @@ $pageLinks = Pagination::createPageLinks($totalRow, $perPage, $page);
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="modal-login" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productName">Login</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="productDescription">
+                            <input type="text" class="form-control" name="name" id="name" aria-describedby="helpId" placeholder="Enter Username">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="btn-save">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <script src="./ajax.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-
-
-
+    </div>
+    <script src="./ajax.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 </body>
 
 </html>

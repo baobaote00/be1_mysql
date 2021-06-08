@@ -1,6 +1,33 @@
 <?php
 class ProductModel extends Db
 {
+    public function getLike($id)
+    {
+        $sql = parent::$connection->prepare("SELECT COUNT(id) FROM like_table WHERE `product_id`=?");
+        $sql->bind_param('i',$id);
+        return parent::select($sql)[0]['COUNT(id)'];
+    }
+    public function getUserLike($id,$username)
+    {
+        $sql = parent::$connection->prepare("SELECT COUNT(id) FROM like_table WHERE `product_id`=? and `username`=?");
+        $sql->bind_param('is',$id,$username);
+        return parent::select($sql)[0]['COUNT(id)'] == 1;
+    }
+    public function setLike($productId,$username)
+    {
+        $sql1 = parent::$connection->prepare("SELECT COUNT(id) FROM like_table WHERE `product_id`=? and `username`=?");
+        $sql1->bind_param('is',$username,$productId);
+
+        if (parent::select($sql1)[0]['COUNT(id)']==0) {
+            $sql = parent::$connection->prepare("INSERT INTO `like_table` VALUES (null,?,?)");
+        }else{
+            $sql = parent::$connection->prepare("DELETE FROM `like_table` WHERE `username`=? and `product_id`=? ");
+        }
+
+        $sql->bind_param('si',$productId,$username);
+
+        return $sql->execute();
+    }
     // Lấy tát cả sản phẩm
     public function getProducts()
     {

@@ -73,7 +73,7 @@ async function getProductByCategory() {
 }
 
 async function searchProduct() {
-    const searchResult =  document.querySelector('#search-result');
+    const searchResult = document.querySelector('#search-result');
     const url = "searchajax.php";
     const data = {
         key: document.querySelector('#search').value
@@ -110,7 +110,7 @@ async function searchProduct() {
 }
 
 async function loadmore() {
-    const searchResult =  document.querySelector('#load-more');
+    const searchResult = document.querySelector('#load-more');
     const url = "pagination.php";
 
     const data = {
@@ -135,8 +135,8 @@ async function loadmore() {
 
     console.table(result)
 
-    if (result.length<3) {
-        searchResult.setAttribute('disabled','')
+    if (result.length < 3) {
+        searchResult.setAttribute('disabled', '')
     }
 
     result.forEach(element => {
@@ -153,8 +153,99 @@ async function loadmore() {
       </div>`
     });
 
+    let likeBox = document.querySelectorAll('.like-box');
+
+    likeBox.forEach(e => {
+        e.addEventListener('click', likeClick)
+    });
+
     loader.style.display = 'none';
+
     searchResult.scrollIntoView();
 }
 
-document.querySelector('#load-more').addEventListener('click',loadmore)
+document.querySelector('#load-more').addEventListener('click', loadmore)
+
+let likeBox = document.querySelectorAll('.like-box');
+
+likeBox.forEach(e => {
+    e.addEventListener('click', likeClick)
+});
+
+async function likeClick(element) {
+    
+
+    if (!getCookie("username")) {
+        var myModal = new bootstrap.Modal(document.getElementById('modal-login'));
+        myModal.show();
+    }
+
+    document.querySelector('#btn-save').addEventListener('click', (e) => {
+        myModal.hide();
+        let name = document.querySelector('#name').value;
+        setCookie("username", name, 24);
+    })
+
+    const url = "like.php";
+
+    const data = {
+        id: $(element.target).attr('data-id'),
+        username: getCookie("username")
+    };
+
+    //gửi yêu cầu lên server
+    const request = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Accept': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(data)
+    });
+
+    //nhận kết quả trả về
+    const result = await request.json();
+
+    if ($(this).find('.like').text()>result) {
+        this.classList.remove('color-blue')
+    }else{
+        this.classList.add('color-blue')
+    }
+
+    $(this).find('.like').text(result);
+
+    console.table(result)
+}
+
+function setCookie(name, value, hoursToLive) {
+    // Encode value in order to escape semicolons, commas, and whitespace
+    var cookie = name + "=" + encodeURIComponent(value);
+
+    if (typeof hoursToLive === "number") {
+        /* Sets the max-age attribute so that the cookie expires
+        after the specified number of days */
+        cookie += "; max-age=" + (hoursToLive * 60 * 60);
+
+        document.cookie = cookie;
+    }
+}
+
+function getCookie(name) {
+    // Split cookie string and get all individual name=value pairs in an array
+    var cookieArr = document.cookie.split(";");
+
+    // Loop through the array elements
+    for (var i = 0; i < cookieArr.length; i++) {
+        var cookiePair = cookieArr[i].split("=");
+
+        /* Removing whitespace at the beginning of the cookie name
+        and compare it with the given string */
+        if (name == cookiePair[0].trim()) {
+            // Decode the cookie value and return
+            return decodeURIComponent(cookiePair[1]);
+        }
+    }
+
+    // Return null if not found
+    return null;
+}
